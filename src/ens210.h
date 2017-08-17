@@ -10,19 +10,19 @@
 
 
 // Measurement status as output by `measure` and `extract`.
-#define ENS210_STATUS_OK        1
-#define ENS210_STATUS_INVALID   2
-#define ENS210_STATUS_CRCERROR  3
-#define ENS210_STATUS_I2CERROR  4
+// Note that the ENS210 provides a "value" (`t_val` or `h_val` each 24 bit).
+// A "value" consists of a payload (17 bit) and a CRC (7 bit) over that payload.
+// The payload consists of a valid flag (1 bit) and the actual measurement data (`t_data` or `h_data`, 16 bit)
+#define ENS210_STATUS_I2CERROR  4 // There was an I2C communication error, `read`ing the value.
+#define ENS210_STATUS_CRCERROR  3 // The value was read, but the CRC over the payload (valid and data) does not match.
+#define ENS210_STATUS_INVALID   2 // The value was read, the CRC matches, but the value is invalid (the measurement was not yet finished).
+#define ENS210_STATUS_OK        1 // The value was read, the CRC matches, and data is valid.
 
 
 class ENS210 {
   public: // Main API functions
     // Resets ENS210 and checks its PART_ID. Returns false on I2C problems or wrong PART_ID.
-    // Optionally pass a solder `correction` (units: 1/64K, default is 50mK).
-    // See "Effect of Soldering on Temperature Readout" in "Design-Guidelines"
-    // https://download.ams.com/ENVIRONMENTAL-SENSORS/ENS210/Documentation
-    bool begin(int correction=50*64/1000);                                
+    bool begin(int correction=0);                                
     // Performs one single shot temperature and relative humidity measurement. 
     // Sets `t_data` (temperature in 1/64K), and `t_status` (from ENS210STATUS_XXX).
     // Sets `h_data` (relative humidity in 1/512 %RH), and `h_status` (from ENS210STATUS_XXX).
@@ -35,6 +35,12 @@ class ENS210 {
     int32_t toCelsius    (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Celsius
     int32_t toFahrenheit (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Fahrenheit
     int32_t toPercentageH(int h_data, int multiplier); // Converts h_data (from `measure`) to multiplier*%RH
+  
+    // Optionally set a solder `correction` (units: 1/64K, default from `begin` is 0).
+    // See "Effect of Soldering on Temperature Readout" in "Design-Guidelines" from
+    // https://download.ams.com/ENVIRONMENTAL-SENSORS/ENS210/Documentation
+    // void correction_set(int correction=50*64/1000); // Sets the solder correction (default is 50mK) - only used by the `toXxx` functions.
+    // int  correction_get(void);                      // Gets the solder correction.
 
   public: // Helper functions (communicating with ENS210)
     bool reset(void);                                  // Sends a reset to the ENS210. Returns false on I2C problems.
@@ -53,6 +59,3 @@ class ENS210 {
 
 
 #endif
-
-
-
