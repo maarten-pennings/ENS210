@@ -10,6 +10,8 @@
 #include "ens210.h"
 
 
+// Chip constants
+#define ENS210_PARTID          0x0210 // The expected part id of the ENS210
 #define ENS210_I2CADDR           0x43 // 7-bit I2C slave address of the ENS210
 #define ENS210_THCONVERSIONTIME   130 // Conversion time in ms for one T/H measurement
 #define ENS210_BOOTING              2 // Booting time in ms (also after reset, or going to high power)
@@ -74,13 +76,12 @@ bool ENS210::begin(int correction) {
   if( correction<-1*64 || correction>+1*64 ) return false; // A correction of more than 1 Kelvin does not make sense (but the 1K is arbitrary)
   // Reset
   bool ok;
-  ok= reset(); if(!ok) return false;
+  ok= reset();  if(!ok) return false;
   // Get part id
   uint16_t partid;
-  uint64_t uid;
-  ok= getversion(&partid,&uid); if(!ok) return false;
+  ok= getversion(&partid,NULL); if(!ok) return false;
   // Check part id
-  if( partid!=0x0210 ) return false;
+  if( partid!=ENS210_PARTID ) return false;
   // Success
   return true;
 }
@@ -113,8 +114,7 @@ bool ENS210::reset(void) {
   Wire.write(0x80);                        // SYS_CTRL: reset
   int result= Wire.endTransmission(true);  // STOP
   //Serial.printf("ens210: debug: reset %d\n",result);
-  // Wait to boot after reset
-  delay(ENS210_BOOTING);
+  delay(ENS210_BOOTING);                   // Wait to boot after reset
   return result==0;
 }
 
@@ -127,8 +127,7 @@ bool ENS210::lowpower(bool enable) {
   Wire.write(power);                       // SYS_CTRL: power
   int result= Wire.endTransmission(true);  // STOP
   //Serial.printf("ens210: debug: lowpower(%d) %d\n",power,result);
-  // Wait boot time
-  delay(ENS210_BOOTING);
+  if( enable ) delay(ENS210_BOOTING);      // Wait boot-time after switch to high power
   return result==0;
 }
 
@@ -138,45 +137,46 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
   bool ok;
   uint8_t i2cbuf[2]; 
   int result;
-  bool littleendian;
-  // Check output parameters
-  if( partid==0 ) return false;
-  if( uid==0 ) return false;
+  
   // Must disable low power to read PART_ID or UID
   ok= lowpower(false); if(!ok) goto errorexit;
+  
   // Read the PART_ID
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
-  Wire.write(ENS210_REG_PART_ID);          // Register address (PART_ID); using auto increment
-  result= Wire.endTransmission(false);     // Repeated START
-  Wire.requestFrom(ENS210_I2CADDR,2,true); // From ENS210, read 2 bytes, STOP
-  //Serial.printf("ens210: debug: getversion/part_id %d\n",result);
-  if( result!=0 ) goto errorexit;
-  // Retrieve and pack bytes into partid
-  for( int i=0; i<2; i++ ) i2cbuf[i]= Wire.read();
-  *partid= i2cbuf[1]*256U + i2cbuf[0]*1U;
-  // Determine if this CPU is little endian
-  littleendian= ((uint8_t*)partid)[0]==i2cbuf[0];
+  if( partid!=0 ) {
+    Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+    Wire.write(ENS210_REG_PART_ID);          // Register address (PART_ID); using auto increment
+    result= Wire.endTransmission(false);     // Repeated START
+    Wire.requestFrom(ENS210_I2CADDR,2,true); // From ENS210, read 2 bytes, STOP
+    //Serial.printf("ens210: debug: getversion/part_id %d\n",result);
+    if( result!=0 ) goto errorexit;
+    // Retrieve and pack bytes into partid
+    for( int i=0; i<2; i++ ) i2cbuf[i]= Wire.read();
+    *partid= i2cbuf[1]*256U + i2cbuf[0]*1U;
+  }
+  
   // Read the UID
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
-  Wire.write(ENS210_REG_UID);              // Register address (UID); using auto increment
-  result= Wire.endTransmission(false);     // Repeated START
-  Wire.requestFrom(ENS210_I2CADDR,8,true); // From ENS210, read 8 bytes, STOP
-  //Serial.printf("ens210: debug: getversion/uid %d\n",result);
-  if( result!=0 ) goto errorexit;
-  // Retrieve and pack bytes into uid (mind the endianness)
-  if( littleendian )
+  if( uid!=0 ) {
+    Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+    Wire.write(ENS210_REG_UID);              // Register address (UID); using auto increment
+    result= Wire.endTransmission(false);     // Repeated START
+    Wire.requestFrom(ENS210_I2CADDR,8,true); // From ENS210, read 8 bytes, STOP
+    //Serial.printf("ens210: debug: getversion/uid %d\n",result);
+    if( result!=0 ) goto errorexit;
+    // Retrieve and pack bytes into uid (ignore the endianness)
     for( int i=0; i<8; i++) ((uint8_t*)uid)[i]=Wire.read();
-  else
-    for( int i=0; i<8; i++) ((uint8_t*)uid)[8-i]=Wire.read();
+  }
+  
   // Go back to default power mode (low power enabled)
   ok= lowpower(true); if(!ok) goto errorexit;
+  
   // { uint32_t hi= *uid >>32, lo= *uid & 0xFFFFFFFF; Serial.printf("ens210: debug: PART_ID=%04x UID=%08x %08x\n",*partid,hi,lo); }
   // Success
   return true; 
+  
 errorexit:
   // Try to go back to default mode (low power enabled)
   ok= lowpower(true);
-  // Hopefully enabling low power was successful; but there was an error before that
+  // Hopefully enabling low power was successful; but there was an error before that anyhow
   return false; 
 }
 
@@ -221,12 +221,12 @@ bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
 // Upon exit, 'data' is the T_DATA or H_DATA, and 'status' one of ENS210_STATUS_XXX.
 void ENS210::extract(uint32_t val, int * data, int * status) {
   // Destruct 'val'
-  * data = (val>>0 ) & 0xffff;
-  int valid= (val>>16) & 0x1;
-  uint32_t crc = (val>>17) & 0x7f;
+  * data           = (val>>0 ) & 0xffff;
+  int valid        = (val>>16) & 0x1;
+  uint32_t crc     = (val>>17) & 0x7f;
   uint32_t payload = (val>>0 ) & 0x1ffff;
   int crc_ok= crc7(payload)==crc;
-  // Check I2C, CRC and valid bit
+  // Check CRC and valid bit
   if( !crc_ok ) *status= ENS210_STATUS_CRCERROR;
   else if( !valid ) *status= ENS210_STATUS_INVALID;
   else *status= ENS210_STATUS_OK;
@@ -287,7 +287,7 @@ int32_t ENS210::toFahrenheit(int t_data, int multiplier) {
   // Uses F=1.8*(K-273.15)+32 and K=t/64.
   return IDIV(9*multiplier*t,320) - IDIV(45967L*multiplier,100);
   // The first multiplication stays below 32 bits (t:16, multiplier:11, 9:4)
-  // The second  multiplication stays below 32 bits (multiplier:10, 45967:16)
+  // The second multiplication stays below 32 bits (multiplier:10, 45967:16)
 }
 
 
@@ -297,10 +297,21 @@ int32_t ENS210::toPercentageH(int h_data, int multiplier) {
   assert( (1<=multiplier) && (multiplier<=1024) );
   // Force 32 bits
   int32_t h= h_data;
-  // Return m*H. This equals m*h/512
+  // Return m*H. This equals m*(h/512) = (m*h)/512
   // Note m is the multiplier, H is the relative humidity in %RH, h is raw h_data value.
   // Uses H=h/512.
   return IDIV(multiplier*h, 512);
 }
 
+
+// Sets the solder correction (default is 50mK) - only used by the `toXxx` functions.
+void ENS210::correction_set(int correction) {
+  assert( -1*64<correction && correction<+1*64 ); // A correction of more than 1 Kelvin does not make sense (but the 1K is arbitrary)
+  _soldercorrection = correction;
+}
+
+
+int ENS210::correction_get(void) {
+  return _soldercorrection;
+}
 
