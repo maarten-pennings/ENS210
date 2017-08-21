@@ -52,25 +52,25 @@ This library has been tested with two boards.
 
 For the NodeMCU (ESP8266), connect as follows
 
-    | ENS210 | ESP8266 |
-    |:------:|:-------:|
-    |   VDD  |   3V3   |
-    |   GND  |   GND   |
-    |   SDA  |   D2    |
-    |   SCL  |   D1    |
+| ENS210 | ESP8266 |
+|:------:|:-------:|
+|   VDD  |   3V3   |
+|   GND  |   GND   |
+|   SDA  |   D2    |
+|   SCL  |   D1    |
 
-    ![wiring ESP8266 NoeMCU](wire-esp.jpg)
+![wiring ESP8266 NoeMCU](wire-esp.jpg)
 
 For the Pro mini (do **not* use a 5V board), connect as follows
 
-    | ENS210 | Pro mini |
-    |:------:|:--------:|
-    |   VDD  |   VCC    |
-    |   GND  |   GND    |
-    |   SDA  |    A4    |
-    |   SCL  |    A5    |
+| ENS210 | Pro mini |
+|:------:|:--------:|
+|   VDD  |   VCC    |
+|   GND  |   GND    |
+|   SDA  |    A4    |
+|   SCL  |    A5    |
 
-    ![wiring pro mini](wire-promini.jpg)
+![wiring pro mini](wire-promini.jpg)
 
 ## Flash an example
 To build an example sketch
