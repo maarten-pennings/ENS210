@@ -70,17 +70,14 @@ static uint32_t crc7( uint32_t val ) {
 
 // Resets ENS210 and checks its PART_ID. Returns false on I2C problems or wrong PART_ID.
 // Stores solder correction.
-bool ENS210::begin(int correction) {
-  // Record solder correction
-  _soldercorrection= correction;
-  if( correction<-1*64 || correction>+1*64 ) return false; // A correction of more than 1 Kelvin does not make sense (but the 1K is arbitrary)
-  // Reset
+bool ENS210::begin(void) {
   bool ok;
-  ok= reset();  if(!ok) return false;
-  // Get part id
   uint16_t partid;
+  // Record solder correction
+  _soldercorrection= 0;
+  // Reset, get and check partid
+  ok= reset();  if(!ok) return false;
   ok= getversion(&partid,NULL); if(!ok) return false;
-  // Check part id
   if( partid!=ENS210_PARTID ) return false;
   // Success
   return true;
@@ -127,7 +124,7 @@ bool ENS210::lowpower(bool enable) {
   Wire.write(power);                       // SYS_CTRL: power
   int result= Wire.endTransmission(true);  // STOP
   //Serial.printf("ens210: debug: lowpower(%d) %d\n",power,result);
-  if( enable ) delay(ENS210_BOOTING);      // Wait boot-time after switch to high power
+  delay(ENS210_BOOTING);                   // Wait boot-time after power switch
   return result==0;
 }
 
@@ -135,12 +132,12 @@ bool ENS210::lowpower(bool enable) {
 // Reads PART_ID and UID of ENS210. Returns false on I2C problems.
 bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
   bool ok;
-  uint8_t i2cbuf[2]; 
+  uint8_t i2cbuf[2];
   int result;
-  
+
   // Must disable low power to read PART_ID or UID
   ok= lowpower(false); if(!ok) goto errorexit;
-  
+
   // Read the PART_ID
   if( partid!=0 ) {
     Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
@@ -153,7 +150,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     for( int i=0; i<2; i++ ) i2cbuf[i]= Wire.read();
     *partid= i2cbuf[1]*256U + i2cbuf[0]*1U;
   }
-  
+
   // Read the UID
   if( uid!=0 ) {
     Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
@@ -165,19 +162,19 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     // Retrieve and pack bytes into uid (ignore the endianness)
     for( int i=0; i<8; i++) ((uint8_t*)uid)[i]=Wire.read();
   }
-  
+
   // Go back to default power mode (low power enabled)
   ok= lowpower(true); if(!ok) goto errorexit;
-  
+
   // { uint32_t hi= *uid >>32, lo= *uid & 0xFFFFFFFF; Serial.printf("ens210: debug: PART_ID=%04x UID=%08x %08x\n",*partid,hi,lo); }
   // Success
-  return true; 
-  
+  return true;
+
 errorexit:
   // Try to go back to default mode (low power enabled)
   ok= lowpower(true);
   // Hopefully enabling low power was successful; but there was an error before that anyhow
-  return false; 
+  return false;
 }
 
 
@@ -208,9 +205,9 @@ bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   *t_val= (i2cbuf[2]*65536UL) + (i2cbuf[1]*256UL) + (i2cbuf[0]*1UL);
   *h_val= (i2cbuf[5]*65536UL) + (i2cbuf[4]*256UL) + (i2cbuf[3]*1UL);
   // Range checking
-  //Serial.printf("ens210: debug: read T=%06x H=%06x\n",*t_val,*h_val); 
+  //Serial.printf("ens210: debug: read T=%06x H=%06x\n",*t_val,*h_val);
   //if( *t_val<(273-100)*64 || *t_val>(273+150)*64 ) return false; // Accept only readouts -100<=T_in_C<=+150 (arbitrary limits)
-  //if( *h_val>100*512 ) return false; // Accept only readouts 0<=H<=100  
+  //if( *h_val>100*512 ) return false; // Accept only readouts 0<=H<=100
   // Success
   return true;
 }
@@ -250,7 +247,7 @@ const char * ENS210::status_str( int status ) {
 int32_t ENS210::toKelvin(int t_data, int multiplier) {
   assert( (1<=multiplier) && (multiplier<=1024) );
   // Force 32 bits
-  int32_t t= t_data;
+  int32_t t= t_data & 0xFFFF;
   // Compensate for soldering effect
   t-= _soldercorrection;
   // Return m*K. This equals m*(t/64) = (m*t)/64
@@ -264,7 +261,7 @@ int32_t ENS210::toKelvin(int t_data, int multiplier) {
 int32_t ENS210::toCelsius(int t_data, int multiplier) {
   assert( (1<=multiplier) && (multiplier<=1024) );
   // Force 32 bits
-  int32_t t= t_data;
+  int32_t t= t_data & 0xFFFF;
   // Compensate for soldering effect
   t-= _soldercorrection;
   // Return m*C. This equals m*(K-273.15) = m*K - 27315*m/100 = m*t/64 - 27315*m/100
@@ -279,7 +276,7 @@ int32_t ENS210::toCelsius(int t_data, int multiplier) {
 int32_t ENS210::toFahrenheit(int t_data, int multiplier) {
   assert( (1<=multiplier) && (multiplier<=1024) );
   // Force 32 bits
-  int32_t t= t_data;
+  int32_t t= t_data & 0xFFFF;
   // Compensate for soldering effect
   t-= _soldercorrection;
   // Return m*F. This equals m*(1.8*(K-273.15)+32) = m*(1.8*K-273.15*1.8+32) = 1.8*m*K-459.67*m = 9*m*K/5 - 45967*m/100 = 9*m*t/320 - 45967*m/100
@@ -296,7 +293,7 @@ int32_t ENS210::toFahrenheit(int t_data, int multiplier) {
 int32_t ENS210::toPercentageH(int h_data, int multiplier) {
   assert( (1<=multiplier) && (multiplier<=1024) );
   // Force 32 bits
-  int32_t h= h_data;
+  int32_t h= h_data & 0xFFFF;
   // Return m*H. This equals m*(h/512) = (m*h)/512
   // Note m is the multiplier, H is the relative humidity in %RH, h is raw h_data value.
   // Uses H=h/512.

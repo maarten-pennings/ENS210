@@ -25,6 +25,8 @@ toKelvin	KEYWORD2
 toCelsius	KEYWORD2
 toFahrenheit	KEYWORD2
 toPercentageH	KEYWORD2
+correction_set	KEYWORD2
+correction_get	KEYWORD2
 
 reset	KEYWORD2
 lowpower	KEYWORD2
