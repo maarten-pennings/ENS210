@@ -42,10 +42,10 @@ Installation steps
 
 ## Build an example
 To build an example sketch
- - (Re)start Arduino
- - Open File>Example>Examples from Custom Libraries>ENS210>ENS210simple
- - Make sure Tools>Board lists the correct board
- - Select Sketch>Verify/Compile
+ - (Re)start Arduino.
+ - Open File > Example > Examples from Custom Libraries > ENS210 > ENS210simple.
+ - Make sure Tools > Board lists the correct board.
+ - Select Sketch > Verify/Compile.
 
 ## Wiring
 This library has been tested with two boards.
@@ -61,7 +61,7 @@ For the NodeMCU (ESP8266), connect as follows
 
 ![wiring ESP8266 NoeMCU](wire-esp.jpg)
 
-For the Pro mini (do **not* use a 5V board), connect as follows
+For the Pro mini (do *not* use a 5V board), connect as follows
 
 | ENS210 | Pro mini |
 |:------:|:--------:|
@@ -74,9 +74,9 @@ For the Pro mini (do **not* use a 5V board), connect as follows
 
 ## Flash an example
 To build an example sketch
- - (Re)start Arduino
- - Open File>Example>Examples from Custom Libraries>ENS210>ENS210simple
- - Alternatively open File>Example>Examples from Custom Libraries>ENS210>ENS210full
+ - (Re)start Arduino.
+ - Open File > Example > Examples from Custom Libraries > ENS210 > ENS210simple.
+ - Alternatively open File > Example > Examples from Custom Libraries > ENS210 > ENS210full.
  - In `setup()` make sure to start the I2C driver correctly.
    For example, for ESP8266 NodeMCU have
      ```C++
@@ -88,9 +88,9 @@ To build an example sketch
      // Wire.begin(D2,D1); // For ESP8266 nodemcu boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
      Wire.begin(); // Arduino pro mini [VDD to VCC, GND to GND, SDA to A4, SCL to A5]
      ```
- - Make sure Tools>Board lists the correct board
- - Select Sketch>Upload
- - Select Tools>Serial Monitor
+ - Make sure Tools > Board lists the correct board.
+ - Select Sketch > Upload.
+ - Select Tools > Serial Monitor.
  - Enjoy the output, which should be like this for `ENS210simple`:
 
      ```Text
@@ -108,7 +108,6 @@ To build an example sketch
      19.3 C, 79 %RH
      19.3 C, 68 %RH
      ```
-
 
 
 (end of doc)
