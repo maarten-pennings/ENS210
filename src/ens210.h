@@ -9,13 +9,13 @@
 #include <stdint.h>
 
 
-// Measurement status as output by `measure` and `extract`.
+// Measurement status as output by `measure()` and `extract()`.
 // Note that the ENS210 provides a "value" (`t_val` or `h_val` each 24 bit).
 // A "value" consists of a payload (17 bit) and a CRC (7 bit) over that payload.
-// The payload consists of a valid flag (1 bit) and the actual measurement data (`t_data` or `h_data`, 16 bit)
+// The payload consists of a valid flag (1 bit) and the actual measurement "data" (`t_data` or `h_data`, 16 bit)
 #define ENS210_STATUS_I2CERROR  4 // There was an I2C communication error, `read`ing the value.
 #define ENS210_STATUS_CRCERROR  3 // The value was read, but the CRC over the payload (valid and data) does not match.
-#define ENS210_STATUS_INVALID   2 // The value was read, the CRC matches, but the value is invalid (the measurement was not yet finished).
+#define ENS210_STATUS_INVALID   2 // The value was read, the CRC matches, but the data is invalid (e.g. the measurement was not yet finished).
 #define ENS210_STATUS_OK        1 // The value was read, the CRC matches, and data is valid.
 
 
@@ -30,7 +30,7 @@ class ENS210 {
     // Note that this function contains a delay of 130ms to wait for the measurement to complete.
     void measure(int * t_data, int * t_status, int * h_data, int * h_status );
 
-  public: // Conversion functions - the temperature conversions also apply the solder correction (see begin() method).
+  public: // Conversion functions - the temperature conversions also substract the solder correction (see correction_set() method).
     int32_t toKelvin     (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Kelvin
     int32_t toCelsius    (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Celsius
     int32_t toFahrenheit (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Fahrenheit
@@ -39,7 +39,7 @@ class ENS210 {
     // Optionally set a solder `correction` (units: 1/64K, default from `begin` is 0).
     // See "Effect of Soldering on Temperature Readout" in "Design-Guidelines" from
     // https://download.ams.com/ENVIRONMENTAL-SENSORS/ENS210/Documentation
-    void correction_set(int correction=50*64/1000); // Sets the solder correction (default is 50mK) - only used by the `toXxx` functions.
+    void correction_set(int correction=50*64/1000); // Sets the solder correction (default is 50mK) - only used by the `toXxx()` functions.
     int  correction_get(void);                      // Gets the solder correction.
 
   public: // Helper functions (communicating with ENS210)
@@ -50,7 +50,7 @@ class ENS210 {
     bool read(uint32_t*t_val,uint32_t*h_val);          // Reads measurement data from the ENS210. Returns false on I2C problems.
 
   public: // Helper functions (data conversion)
-    void extract(uint32_t val,int*data,int*status);    // Extracts measurement `data` and `status` from a `val` obtained from `read`.
+    void extract(uint32_t val,int*data,int*status);    // Extracts measurement `data` and `status` from a `val` obtained from `read()`.
     const char * status_str( int status );             // Converts a status (ENS210_STATUS_XXX) to a human readable string.
 
   private: // Data members
