@@ -30,7 +30,7 @@ class ENS210 {
     // Note that this function contains a delay of 130ms to wait for the measurement to complete.
     void measure(int * t_data, int * t_status, int * h_data, int * h_status );
 
-  public: // Conversion functions - the temperature conversions also substract the solder correction (see correction_set() method).
+  public: // Conversion functions - the temperature conversions also subtract the solder correction (see correction_set() method).
     int32_t toKelvin     (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Kelvin
     int32_t toCelsius    (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Celsius
     int32_t toFahrenheit (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Fahrenheit
