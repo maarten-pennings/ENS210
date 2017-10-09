@@ -1,0 +1,55 @@
+<HTML>
+  <HEAD>
+    <STYLE>
+      IFRAME { margin:0; padding:0; position: absolute; border:1px #c0c0c0 solid; }
+    </STYLE>
+    <SCRIPT>
+    function addIFrame(channel,field,color) {
+      var iframe = document.createElement("IFRAME");
+      // The onResize() will set the iframe 'src' from 'orgsrc' while appending width and height
+      iframe.orgsrc = "https://thingspeak.com/channels/"+channel+"/charts/"+field+"?color=%23"+color+"&dynamic=true&results=1000"
+      document.body.appendChild(iframe);
+    }
+    function onLoad() {
+      // Call addIFrame with (1) ThingSpeak channel number, (2) ThingSpeak field number, (3) desired graph color. All params are strings. [may be changed]
+      // Color hint: red="d62020" (ThingSpeak default), blue="4189f4", yellow="f4d442", green="249600"
+      addIFrame("249563","2","f4d442");
+      addIFrame("320672","1","249600");
+      addIFrame("249563","1","f4d442");
+      addIFrame("320672","2","249600");
+      // Set page title (although page is supposed to be shown 'full screen'/F11) [may be changed]
+      document.title = "Humidity and pressure @ HTC"
+      // Force iframes to correct size
+      onResize();
+    }
+    function onResize() {
+      var ww = window.innerWidth; // ww,wh = window width,height
+      var wh = window.innerHeight;
+      var xw = 24; // xw,xh = "extra" width,height (total margin of all iframes) [may be changed]
+      var xh = 24;
+      var iframes = document.getElementsByTagName("IFRAME");
+      var count= iframes.length
+      var cols= count<4 ? 1: 2; // cols,rows = iframe grid size [may be changed]
+      var rows= Math.ceil(count/cols);
+      var iw = Math.trunc((ww-xw)/cols); // iw,ih = iframe width,height
+      var ih = Math.trunc((wh-xh)/rows);
+      var sw = (ww-cols*iw)/(1+cols); // sw,sh = inter iframe spacing in width,height
+      var sh = (wh-rows*ih)/(1+rows);
+      for(var y=0; y<rows; y++) {
+        for(var x=0; x<cols; x++ ) {
+          var i=x+y*cols;
+          iframes[i].width = iw;
+          iframes[i].height = ih;
+          iframes[i].style.left = x*iw + sw*(x+1);
+          iframes[i].style.top = y*ih + sh*(y+1);
+          iframes[i].src = iframes[i].orgsrc+"&width="+iw+"&height="+ih
+        }
+        // document.title = "w="+w+", h="+h;
+      }
+    }
+    </SCRIPT>
+  </HEAD>
+  <BODY ONLOAD="onLoad()" ONRESIZE="onResize()">
+    <!-- onLoad() creates IFRAME elements -->
+  </BODY>
+</HTML>
