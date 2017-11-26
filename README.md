@@ -48,7 +48,7 @@ To build an example sketch
  - Select Sketch > Verify/Compile.
 
 ## Wiring
-This library has been tested with two boards.
+This library has been tested with three boards.
 
 For the NodeMCU (ESP8266), connect as follows
 
@@ -72,6 +72,17 @@ For the Pro mini (do *not* use a 5V board), connect as follows
 
 ![wiring pro mini](wire-promini.jpg)
 
+For the Arduino Nano, connect as follows
+
+| ENS210 |   Nano   |
+|:------:|:--------:|
+|   VDD  |   3V3    |
+|   GND  |   GND    |
+|   SDA  |    A4    |
+|   SCL  |    A5    |
+
+![wiring nano](wire-nanov3.jpg)
+
 ## Flash an example
 To build an example sketch
  - (Re)start Arduino.
@@ -81,12 +92,12 @@ To build an example sketch
    For example, for ESP8266 NodeMCU have
      ```C++
      Wire.begin(D2,D1); // For ESP8266 nodemcu boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
-     // Wire.begin(); // Arduino pro mini [VDD to VCC, GND to GND, SDA to A4, SCL to A5]
+     // Wire.begin(); // Arduino pro mini or Nano [VDD to VCC/3V3, GND to GND, SDA to A4, SCL to A5]
      ```
-   and for Arduino pro mini have
+   and for Arduino pro mini or Nano have
      ```C++
      // Wire.begin(D2,D1); // For ESP8266 nodemcu boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
-     Wire.begin(); // Arduino pro mini [VDD to VCC, GND to GND, SDA to A4, SCL to A5]
+     Wire.begin(); // Arduino pro mini or Nano [VDD to VCC/3V3, GND to GND, SDA to A4, SCL to A5]
      ```
  - Make sure Tools > Board lists the correct board.
  - Select Sketch > Upload.
