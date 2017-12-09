@@ -52,7 +52,7 @@ To build an example sketch
 ## Wiring
 This library has been tested with three boards.
 
-For the NodeMCU (ESP8266), connect as follows
+For the NodeMCU (ESP8266), connect as follows (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 | ESP8266 |
 |:------:|:-------:|
@@ -63,7 +63,7 @@ For the NodeMCU (ESP8266), connect as follows
 
 ![wiring ESP8266 NoeMCU](wire-esp.jpg)
 
-For the Pro mini (do *not* use a 5V board), connect as follows
+For the Pro mini (do *not* use a 5V board), connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 | Pro mini |
 |:------:|:--------:|
@@ -74,7 +74,7 @@ For the Pro mini (do *not* use a 5V board), connect as follows
 
 ![wiring pro mini](wire-promini.jpg)
 
-For the Arduino Nano, connect as follows
+For the Arduino Nano, connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 |   Nano   |
 |:------:|:--------:|
