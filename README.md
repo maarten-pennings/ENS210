@@ -7,11 +7,13 @@ This chip is a relative humidity and temperature sensor with an I2C interface.
 This driver is based on the code supplied by *ams*, the manufacturer of the chip.
 
 The code has been tested with
- - [NodeMCU (ESP8266)](https://www.aliexpress.com/item/1pcs-NodeMCU-V3-Lua-WIFI-module-integration-of-ESP8266-extra-memory-32M-Flash-USB-serial-CH340G/32813549591.html)
- - [Arduino pro mini](https://www.aliexpress.com/item/Freeshipping-1pcs-lot-Pro-Mini-328-Mini-3-3V-16M-ATMEGA328-3-3V-16MHz-for-arduino/32695657337.html)
+ - [NodeMCU (ESP8266)](https://www.aliexpress.com/item/NodeMCU-V3-Lua-WIFI-module-integration-of-ESP8266-extra-memory-32M-flash-USB-serial-CP2102/32779738528.html)
+ - [Arduino pro mini](https://www.aliexpress.com/item/ProMini-ATmega328P-3-3V-Compatible-for-Arduino-Pro-Mini/32525927539.html)
+ - [Arduino nano](https://www.aliexpress.com/item/Nano-CH340-ATmega328P-MicroUSB-Compatible-for-Arduino-Nano-V3/32572612009.html)
 
 Note that the ENS210 requires a supply voltage of 1.71V .. 3.6V.
 So, 3.3V is ok, but *do not use a 5V board*.
+The Nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
 
 ## Links
 The ENS210 is made by [ams](http://www.ams.com).
