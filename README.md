@@ -35,12 +35,12 @@ Installation steps
  - Visit the [project page](https://github.com/maarten-pennings/ENS210) for the Arduino ENS210 library.
  - Click the green button `Clone or download` on the right side.
  - From the pop-up choose `Download ZIP`.
- - Unzip the file "Here", so that this `README.md` is in the top-level directory
-   with the name `ENS210-master`.
- - Rename the top-level directory `ENS210-master` to `ENS210`.
- - Copy the entire tree to the Arduino library directory.
-   This `README.md` should be located at e.g.
-   `C:\Users\maarten\Documents\Arduino\libraries\ENS210\README.md`.
+ - Start Arduino, select from menu Sketch > Include Library > Add .ZIP Library... and select the just downloaded ZIP file.
+ - An alternative to the last step is to manually add the library
+    - Unzip the file "Here", so that this `README.md` is in the top-level directory with the name `ENS210-master`.
+    - Copy the entire tree to the Arduino library directory.
+      This `README.md` should be located at e.g.
+      `C:\Users\maarten\Documents\Arduino\libraries\ENS210\README.md`.
 
 ## Build an example
 To build an example sketch
