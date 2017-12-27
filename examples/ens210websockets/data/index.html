@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ENS210 websockets</title>
+    <style> #idMessages { height:500px; width:auto; border:1px solid #c0c0c0; overflow: auto; } </style>
+    <script>
+      if ( !("WebSocket" in window) ) alert("WebSockets are not supported by your browser.");
+
+      var connection= new WebSocket('ws://' + location.hostname + ':81/');
+
+      connection.onopen= function() {
+        console.log("ws: on: opened");
+        var statusSpan= document.getElementById("idStatus");
+        statusSpan.innerHTML= "connected";
+      };
+
+      connection.onclose= function() {
+        console.log("ws: on: closed");
+        var statusSpan= document.getElementById("idStatus");
+        statusSpan.innerHTML= "closed";
+      };
+
+      connection.onerror= function(errorMsg) {
+        console.log('ws: on: error: ', errorMsg);
+        var statusSpan= document.getElementById("idStatus");
+        statusSpan.innerHTML= "Error: " + errorMsg;
+      };
+
+      connection.onmessage= function(msg) {
+        console.log('ws: msg: ', msg.data);
+        var chatMsgsDiv = document.getElementById("idMessages");
+        chatMsgsDiv.innerHTML+= msg.data + "<br/>";
+        chatMsgsDiv.scrollTop= chatMsgsDiv.scrollHeight;
+      };
+    </script>
+  </head>
+
+  <body>
+    <h1>ENS210 websockets</h1>
+    <div>Connection status: <span id="idStatus">unknown</span></div>
+    <div id="idMessages"></div>
+  </body>
+</html>

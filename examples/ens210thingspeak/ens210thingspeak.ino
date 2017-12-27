@@ -4,7 +4,8 @@
 */
 
 /*
-This script assumes you have
+This sketch assumes you have
+- an ESP8266
 - installed the ENS210 Arduino library 
    Goto https://github.com/maarten-pennings/ENS210, press Download zipfile
    Click Sketch > Include Library > Add .ZIP Library...  then select downloaded zip file
@@ -91,8 +92,7 @@ void setup() {
   led_on();
 
   // Enable I2C
-  Wire.begin( /*SDA*/D2,/*SCL*/D1); // For ESP8266 NodeMCU boards
-  // Wire.begin(); // Arduino pro mini or Nano
+  Wire.begin( /*SDA*/D2,/*SCL*/D1); 
   Serial.println("init: I2C up");
 
   // Enable ENS210
