@@ -53,30 +53,14 @@ WiFiClient  client;
 ENS210      ens210;
 
 
-// Wrapper calling ens210.measure. It updates the arguments when the data was successfully read.
-// Converts to °C and %RH
+// Wrapper calling ens210.measure. It updates the arguments when the data was successfully read. Converts to °C and %RH
 void ens210_measure(float * TData, int * TStatus, float * HData, int * HStatus) {
-  // Read the ENS210
-  int t_data, t_status, h_data, h_status;
-  ens210.measure(&t_data, &t_status, &h_data, &h_status );
-
-  // Use new values for T
-  if( t_status==ENS210_STATUS_OK ) { // T data ok, so update
-    *TData= ens210.toCelsius(t_data,1000)/1000.0;
-    //*TData= ens210.toFahrenheit(t_data,1000)/1000.0;
-    //*TData= ens210.toFahrenheit(t_data,1000)/1000.0;
-    *TStatus = t_status;
-  } else { // T data not ok, so do not update (keep old)
-    *TStatus = t_status;
-  }
-
-  // Use new values for H
-  if( h_status==ENS210_STATUS_OK ) { // H data ok, so update
-    *HData= ens210.toPercentageH(h_data,1000)/1000.0;
-    *HStatus = h_status;
-  } else { // H data not ok, so do not update (keep old)
-    *HStatus = h_status;
-  }
+  // Read the ENS210 (into temporary variables)
+  int _TData, _HData;
+  ens210.measure(&_TData, TStatus, &_HData, HStatus );
+  // Update TData and HData when there was no error
+  if( *TStatus==ENS210_STATUS_OK ) *TData= ens210.toCelsius(_TData,1000)/1000.0;     
+  if( *HStatus==ENS210_STATUS_OK ) *HData= ens210.toPercentageH(_HData,1000)/1000.0; 
 }
 
 

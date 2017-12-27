@@ -19,7 +19,7 @@ This sketch assumes you have
 - compiled, uploaded and started the sketch
 
 How to use
- - This app creates an access point.
+ - This app creates an access point (named ENS210).
  - From a laptop or smartphone connect to this access point.
  - On the laptop or accesspoint startup a browser and visit any page (e.g. 10.10.10.10).
  - A webpage will popup showing a stream of ENS210 measurements.
@@ -35,9 +35,10 @@ How to use
 #include "ens210.h"           // ENS210 library
 
 
-#define APNAME  "ENS210WS"    // Name of the Access Point
-#define FILE    "index.html"  // The file to returns to webbrowser 
+#define APNAME  "ENS210"      // Name of the Access Point
+#define FILE    "index.html"  // The html file to return to webbrowsers
 #define WAIT    500           // Delays in ms between websocket messages (ens210 measurements)
+#define VERSION "v1"          // Version of this app
 
 
 #define LED_PIN    D4    // GPIO2 == D4 == standard BLUE led available on most NodeMCU boards (LED on == D4 low)
@@ -54,8 +55,7 @@ ENS210           ens210;
 
 
 void ws_event(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-  (void)payload;
-  (void)length;
+  (void)payload; (void)length; // Suppress warnings
   switch( type ) {
     case WStype_CONNECTED   : Serial.printf("wsev: connected (slot %u)\n", num); break;
     case WStype_DISCONNECTED: Serial.printf("wsev: disconnected (slot %u)\n", num); break;
@@ -66,27 +66,12 @@ void ws_event(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
 
 // Wrapper calling ens210.measure. It updates the arguments when the data was successfully read. Converts to °C and %RH
 void ens210_measure(float * TData, int * TStatus, float * HData, int * HStatus) {
-  // Read the ENS210
-  int t_data, t_status, h_data, h_status;
-  ens210.measure(&t_data, &t_status, &h_data, &h_status );
-
-  // Use new values for T
-  if( t_status==ENS210_STATUS_OK ) { // T data ok, so update
-    *TData= ens210.toCelsius(t_data,1000)/1000.0;
-    //*TData= ens210.toFahrenheit(t_data,1000)/1000.0;
-    //*TData= ens210.toFahrenheit(t_data,1000)/1000.0;
-    *TStatus = t_status;
-  } else { // T data not ok, so do not update (keep old)
-    *TStatus = t_status;
-  }
-
-  // Use new values for H
-  if( h_status==ENS210_STATUS_OK ) { // H data ok, so update
-    *HData= ens210.toPercentageH(h_data,1000)/1000.0;
-    *HStatus = h_status;
-  } else { // H data not ok, so do not update (keep old)
-    *HStatus = h_status;
-  }
+  // Read the ENS210 (into temporary variables)
+  int _TData, _HData;
+  ens210.measure(&_TData, TStatus, &_HData, HStatus );
+  // Update TData and HData when there was no error
+  if( *TStatus==ENS210_STATUS_OK ) *TData= ens210.toCelsius(_TData,1000)/1000.0;     
+  if( *HStatus==ENS210_STATUS_OK ) *HData= ens210.toPercentageH(_HData,1000)/1000.0; 
 }
 
 
@@ -95,7 +80,7 @@ void setup() {
   
   // Enable Serial
   Serial.begin(115200);
-  Serial.printf("\n\ninit: Welcome to ENS210 websockets\n");
+  Serial.printf("\n\ninit: Welcome to ENS210 websockets %s\n", VERSION);
 
   // Enable LED
   led_init();
