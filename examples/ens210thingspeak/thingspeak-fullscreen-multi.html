@@ -20,15 +20,15 @@
       iframe.zoom= zoom;
     }
     function onLoad() {
-      // Call addIFrame with (1) ThingSpeak channel number, (2) ThingSpeak field number, (3) desired graph color. All params are strings. [may be changed]
+      // Call addIFrame with (1) ThingSpeak channel number, (2) ThingSpeak field number, (3) desired graph color. All params are strings.
       // Color hint: red="d62020" (ThingSpeak default), blue="4189f4", yellow="f4d442", green="249600", amsgrey="46555f"
-      addIFrame("249563","2","f4d442"); // ENS210.H
-      addIFrame("320672","1","249600"); // ENS220.P
-      addIFrame("249563","1","f4d442"); // ENS210.T
-      // addIFrame("320672","2","249600"); // ENS220.T
-      addIFrame("381884","1","46555f"); // iAQcore.CO2
-      // Set page title (although page is supposed to be shown 'full screen'/F11) [may be changed]
-      document.title = "ENS sensors @ HTC"
+      addIFrame("249563","2","f4d442");    // ENS210.H [may be changed]
+      addIFrame("320672","1","249600");    // ENS220.P [may be changed]
+      addIFrame("249563","1","f4d442");    // ENS210.T [may be changed]
+      // addIFrame("320672","2","249600"); // ENS220.T [may be changed]
+      addIFrame("381884","1","46555f");    // iAQcore.CO2 [may be changed]
+      // Set page title (although page is supposed to be shown 'full screen'/F11)
+      document.title = "ENS sensors @ HTC" // [may be changed]
       // Force iframes to correct size
       onResize();
     }
