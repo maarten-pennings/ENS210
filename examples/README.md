@@ -28,9 +28,17 @@ This has only been tested on ESP8266.
 
 ## ens210websockets
 An application that demos how to "push" measurement data (from ENS210) to web clients (using websockets).
+The data appears in a simple list in the browser.
 Uses several libraries: web server, websocket server, dns server, flash file system.
 
 This has only been tested on ESP8266.
 
+
+## ens210wsgraph
+This application is an extension of the previous.
+Data no longer appears in a list, but is shown in a graph, using the 
+excellent [smoothie](http://smoothiecharts.org/) library.
+
+This has only been tested on ESP8266.
 
 (end of doc)

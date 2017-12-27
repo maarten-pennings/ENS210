@@ -1,5 +1,5 @@
 /*
-  ens210websockets.ino - Web (and websocket) server for ESP8266 that streams ENS210 data (temperature and humidity) to any web browser.
+  ens210wsgraph.ino - Streams ENS210 data (temperature and humidity) from an ESP8266 via websockets to a graph in a web browser.
   Created by Maarten Pennings 2017 Dec 27
 */
 
@@ -22,7 +22,7 @@ How to use
  - This app creates an access point (named ENS210).
  - From a laptop or smartphone connect to this access point.
  - On the laptop or accesspoint startup a browser and visit any page (e.g. 10.10.10.10).
- - A webpage will popup showing a stream of ENS210 measurements.
+ - A webpage will popup showing a moving graph of ENS210 measurements.
  - Note that this app prints a log to serial.
  - Note that the javascript in the browser also prints a log to console.
 */
@@ -36,10 +36,11 @@ How to use
 #include "ens210.h"           // ENS210 library
 
 
-#define APNAME  "ENS210"      // Name of the Access Point
-#define FILE    "index.html"  // The html file to return to webbrowsers
-#define WAIT    500           // Delays in ms between websocket messages (ens210 measurements)
-#define VERSION "v1"          // Version of this app
+#define APNAME   "ENS210"     // Name of the Access Point
+#define FILEHTML "index.html" // The html file to return to webbrowsers
+#define FILEJS   "smoothie.js"// The js file to return to webbrowsers
+#define WAIT     500          // Delays in ms between websocket messages (ens210 measurements)
+#define VERSION  "v1"         // Version of this app
 
 
 #define LED_PIN    D4    // GPIO2 == D4 == standard BLUE led available on most NodeMCU boards (LED on == D4 low)
@@ -121,9 +122,17 @@ void setup() {
   // Configure and start http server 
   http_server.on("/", []() {
     Serial.printf("http: req '/' ... ");
-    File f= SPIFFS.open("/" FILE, "r");
-    Serial.printf("sending '%s' size %d ... ", FILE, f.size());
+    File f= SPIFFS.open("/" FILEHTML, "r");
+    Serial.printf("sending '%s' size %d ... ", FILEHTML, f.size());
     http_server.streamFile(f, "text/html");
+    f.close();
+    Serial.printf("done\n");
+  });
+  http_server.on("/" FILEJS, []() {
+    Serial.printf("http: req '/" FILEJS "' ... ");
+    File f= SPIFFS.open("/" FILEJS, "r");
+    Serial.printf("sending '%s' size %d ... ", FILEJS, f.size());
+    http_server.streamFile(f, "application/javascrip");
     f.close();
     Serial.printf("done\n");
   });
