@@ -1,4 +1,15 @@
 <HTML>
+  <!--
+    This is an HTML file that displays ThingSpeak graphs. 
+    It has the following features:
+     - Displays multiple graphs in a grid
+     - Maximizes the graphs to fit the browser window (press F11 for better results)
+     - Uses different colors for different graphs
+     - Has a zoom button that full-screens one graph
+     
+    Note: This html file has user configurable fields.
+    They are tagged with "[may be changed]".
+  -->
   <HEAD>
     <STYLE>
       IFRAME { margin:0; padding:0; position:absolute; border:1px #c0c0c0 solid; }
@@ -6,7 +17,6 @@
       A      { text-decoration:none; color:inherit; }
     </STYLE>
     <SCRIPT>
-    // User configurable fields are tagged with "[may be changed]"
     function addIFrame(channel,field,color) {
       var iframe = document.createElement("IFRAME");
       // The onResize() will set the iframe 'src' from 'orgsrc' while appending width and height
