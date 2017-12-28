@@ -41,15 +41,16 @@
       var tsmoothie = new SmoothieChart( {
         millisPerPixel:100,
         grid:{millisPerLine:10000,verticalSections:7},
-        minValue:-5,
-        maxValue:30,
+        minValue:18,
+        maxValue:25,
         labels:{precision: 2},
         yMinFormatter: tformatter,
         yMaxFormatter: tformatter,
         timestampFormatter:SmoothieChart.timeFormatter,
+        labels:{fontSize:16},
       });
       var tline = new TimeSeries();
-      tsmoothie.addTimeSeries(tline, {lineWidth:2,strokeStyle:'#00ff00'} );
+      tsmoothie.addTimeSeries(tline, {lineWidth:5,strokeStyle:'#00ff00',fillStyle:'rgba(0,255,0,0.3)'} );
 
       // Setup the H graph
       var hformatter = function(min, precision) { return min.toFixed(precision)+" %RH"; }
@@ -62,9 +63,10 @@
         yMinFormatter: hformatter,
         yMaxFormatter: hformatter,
         timestampFormatter:SmoothieChart.timeFormatter,
+        labels:{fontSize:16},
       });
       var hline = new TimeSeries();
-      hsmoothie.addTimeSeries(hline, {lineWidth:2,strokeStyle:'#0000ff'} );
+      hsmoothie.addTimeSeries(hline, {lineWidth:5,strokeStyle:'#0000ff',fillStyle:'rgba(0,0,255,0.3)'} );
 
       function resize(canvas) {
         canvas.width= window.innerWidth*0.45;
@@ -73,11 +75,11 @@
 
       function init() {
         var t_canvas= document.getElementById("t_canvas");
-        tsmoothie.streamTo(t_canvas, 1000 /* delay */ );
+        tsmoothie.streamTo(t_canvas, 500 /* delay */ );
         window.addEventListener('resize', function(){resize(t_canvas);}, false);
         resize(t_canvas);
         var h_canvas= document.getElementById("h_canvas");
-        hsmoothie.streamTo(h_canvas, 1000 /* delay */ );
+        hsmoothie.streamTo(h_canvas, 500 /* delay */ );
         window.addEventListener('resize', function(){resize(h_canvas);}, false);
         resize(h_canvas);
       }
@@ -86,7 +88,8 @@
     <script>
       if ( !("WebSocket" in window) ) alert("WebSockets are not supported by your browser.");
 
-      var connection= new WebSocket('ws://' + location.hostname + ':81/');
+      //var connection= new WebSocket('ws://' + location.hostname + ':81/');
+      var connection= new WebSocket('ws://10.10.10.10:81/');
 
       connection.onopen= function() {
         console.log("ws: on: opened");
@@ -108,7 +111,7 @@
 
       var mc=0;
       connection.onmessage= function(msg) {
-        console.log('ws: msg: ', msg.data); 
+        console.log('ws: msg: ', msg.data);
         mc++;
         // Parse msg.data "T=21.44, H=40.85" into two floats
         var ft = null;
@@ -130,10 +133,10 @@
             tline.append(time, ft);
             hline.append(time, fh);
           } else {
-            console.log('ws: msg missing "T=" or "H="'); 
+            console.log('ws: msg missing "T=" or "H="');
           }
         } else {
-          console.log('ws: msg missing ", "'); 
+          console.log('ws: msg missing ", "');
         }
       };
     </script>
