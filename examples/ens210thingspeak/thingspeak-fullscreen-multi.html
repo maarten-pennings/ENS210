@@ -4,7 +4,7 @@
     It has the following features:
      - Displays multiple graphs in a grid
      - Maximizes the graphs to fit the browser window (press F11 for better results)
-     - Uses different colors for different graphs
+     - Uses different colors and number of samples for different graphs
      - Has a zoom button that full-screens one graph
      
     Note: This html file has user configurable fields.
@@ -17,10 +17,10 @@
       A      { text-decoration:none; color:inherit; }
     </STYLE>
     <SCRIPT>
-    function addIFrame(channel,field,color) {
+    function addIFrame(channel,field,color,results) {
       var iframe = document.createElement("IFRAME");
       // The onResize() will set the iframe 'src' from 'orgsrc' while appending width and height
-      iframe.orgsrc = "https://thingspeak.com/channels/"+channel+"/charts/"+field+"?color=%23"+color+"&dynamic=true&results=1000";
+      iframe.orgsrc = "https://thingspeak.com/channels/"+channel+"/charts/"+field+"?color=%23"+color+"&results="+results+"&dynamic=true";
       // Add iframe to body
       document.body.appendChild(iframe);
       // Add zoom button to iframe
@@ -30,15 +30,16 @@
       iframe.zoom= zoom;
     }
     function onLoad() {
-      // Call addIFrame with (1) ThingSpeak channel number, (2) ThingSpeak field number, (3) desired graph color. All params are strings.
+      // Call addIFrame with (1) ThingSpeak channel number, (2) ThingSpeak field number, (3) desired graph color, and (4) number of samples in graph. 
+      // All parameters are strings.
       // Color hint: red="d62020" (ThingSpeak default), blue="4189f4", yellow="f4d442", green="249600", amsgrey="46555f"
-      addIFrame("249563","2","f4d442");    // ENS210.H [may be changed]
-      addIFrame("320672","1","249600");    // ENS220.P [may be changed]
-      addIFrame("249563","1","f4d442");    // ENS210.T [may be changed]
-      // addIFrame("320672","2","249600"); // ENS220.T [may be changed]
-      addIFrame("381884","1","46555f");    // iAQcore.CO2 [may be changed]
+      addIFrame("249563","2","f4d442","1200"); // ENS210.H [may be changed]
+      addIFrame("320672","1","249600","1200"); // ENS220.P [may be changed]
+      addIFrame("249563","1","f4d442","1200"); // ENS210.T [may be changed]
+   // addIFrame("320672","2","249600","1200"); // ENS220.T [may be changed]
+      addIFrame("381884","1","46555f", "600"); // iAQcore.CO2 [may be changed]
       // Set page title (although page is supposed to be shown 'full screen'/F11)
-      document.title = "ENS sensors @ HTC" // [may be changed]
+      document.title = "ENS sensors @ HTC"     // [may be changed]
       // Force iframes to correct size
       onResize();
     }
