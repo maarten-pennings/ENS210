@@ -44,7 +44,7 @@ This has only been tested on ESP8266.
 Note that this example uses the flash file system of the ESP8266 (see ino for instructions).
 
 Sample serial output:
-'''Text
+```Text
 init: Welcome to ENS210 websockets v1
 init: LED up
 init: I2C up
@@ -78,7 +78,7 @@ data: 18.91°C (ok) 48.06%RH (ok) 500ms
 data: 18.90°C (ok) 48.08%RH (ok) 500ms
 data: 18.91°C (ok) 48.06%RH (ok) 500ms
 data: 18.91°C (ok) 48.06%RH (ok) 500ms
-'''
+```
 
 Screenshot connected phone
 ![Screenshot ens210wsgraph](ens210wsgraph.png)
