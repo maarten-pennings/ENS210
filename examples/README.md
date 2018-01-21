@@ -41,4 +41,46 @@ excellent [smoothie](http://smoothiecharts.org/) library.
 
 This has only been tested on ESP8266.
 
+Note that this example uses the flash file system of the ESP8266 (see ino for instructions).
+
+Sample serial output:
+'''Text
+init: Welcome to ENS210 websockets v1
+init: LED up
+init: I2C up
+init: ENS210 up
+init: FFS up
+init: AP config 'ENS210' at 10.10.10.10
+init: AP up
+init: DNS server up
+init: WS server up
+init: HTTP server up
+
+data: 18.94°C (ok) 47.91%RH (ok) 500ms
+data: 18.93°C (ok) 47.93%RH (ok) 500ms
+data: 18.93°C (ok) 47.85%RH (ok) 500ms
+data: 18.91°C (ok) 47.81%RH (ok) 500ms
+data: 18.88°C (ok) 47.73%RH (ok) 500ms
+data: 18.94°C (ok) 47.68%RH (ok) 500ms
+data: 18.93°C (ok) 47.70%RH (ok) 500ms
+data: 18.91°C (ok) 47.68%RH (ok) 500ms
+data: 18.90°C (ok) 48.08%RH (ok) 500ms
+data: 18.91°C (ok) 48.06%RH (ok) 500ms
+http: req '/' ... sending 'index.html' size 5155 ... done
+data: 18.94°C (ok) 48.07%RH (ok) 500ms
+data: 18.91°C (ok) 48.08%RH (ok) 500ms
+data: 18.91°C (ok) 48.06%RH (ok) 500ms
+http: req '/smoothie.js' ... sending 'smoothie.js' size 12922 ... done
+data: 18.91°C (ok) 48.06%RH (ok) 533ms
+wsev: connected (slot 0)
+data: 18.93°C (ok) 48.08%RH (ok) 500ms
+data: 18.91°C (ok) 48.06%RH (ok) 500ms
+data: 18.90°C (ok) 48.08%RH (ok) 500ms
+data: 18.91°C (ok) 48.06%RH (ok) 500ms
+data: 18.91°C (ok) 48.06%RH (ok) 500ms
+'''
+
+Screenshot connected phone
+![Screenshot ens210wsgraph](ens210wsgraph.png)
+
 (end of doc)
