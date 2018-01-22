@@ -53,7 +53,8 @@ class ENS210 {
     void extract(uint32_t val,int*data,int*status);    // Extracts measurement `data` and `status` from a `val` obtained from `read()`.
     const char * status_str( int status );             // Converts a status (ENS210_STATUS_XXX) to a human readable string.
 
-  private: // Data members
+  protected: // Data members
+    int  _slaveaddress= 0x43;                          // Slave address of ENS210
     int  _soldercorrection;                            // Correction due to soldering (in 1/64K); subtracted from `t_data` by conversion functions.
 };
 

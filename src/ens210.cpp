@@ -12,7 +12,6 @@
 
 // Chip constants
 #define ENS210_PARTID          0x0210 // The expected part id of the ENS210
-#define ENS210_I2CADDR           0x43 // 7-bit I2C slave address of the ENS210
 #define ENS210_THCONVERSIONTIME   130 // Conversion time in ms for one T/H measurement
 #define ENS210_BOOTING              2 // Booting time in ms (also after reset, or going to high power)
 
@@ -106,7 +105,7 @@ void ENS210::measure(int * t_data, int * t_status, int * h_data, int * h_status 
 
 // Sends a reset to the ENS210. Returns false on I2C problems.
 bool ENS210::reset(void) {
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+  Wire.beginTransmission(_slaveaddress);  // START, SLAVEADDR
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(0x80);                        // SYS_CTRL: reset
   int result= Wire.endTransmission(true);  // STOP
@@ -119,7 +118,7 @@ bool ENS210::reset(void) {
 // Sets ENS210 to low (true) or high (false) power. Returns false on I2C problems.
 bool ENS210::lowpower(bool enable) {
   uint8_t power = enable ? 0x01: 0x00;
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(power);                       // SYS_CTRL: power
   int result= Wire.endTransmission(true);  // STOP
@@ -140,10 +139,10 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
 
   // Read the PART_ID
   if( partid!=0 ) {
-    Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+    Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
     Wire.write(ENS210_REG_PART_ID);          // Register address (PART_ID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
-    Wire.requestFrom(ENS210_I2CADDR,2,true); // From ENS210, read 2 bytes, STOP
+    Wire.requestFrom(_slaveaddress,2,true);  // From ENS210, read 2 bytes, STOP
     //Serial.printf("ens210: debug: getversion/part_id %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into partid
@@ -153,10 +152,10 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
 
   // Read the UID
   if( uid!=0 ) {
-    Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+    Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
     Wire.write(ENS210_REG_UID);              // Register address (UID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
-    Wire.requestFrom(ENS210_I2CADDR,8,true); // From ENS210, read 8 bytes, STOP
+    Wire.requestFrom(_slaveaddress,8,true);  // From ENS210, read 8 bytes, STOP
     //Serial.printf("ens210: debug: getversion/uid %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into uid (ignore the endianness)
@@ -180,7 +179,7 @@ errorexit:
 
 // Configures ENS210 to perform a single measurement. Returns false on I2C problems.
 bool ENS210::startsingle(void) {
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_SENS_RUN);         // Register address (SENS_RUN); using auto increment
   Wire.write(0x00);                        // SENS_RUN  : Tsingle, Hsingle
   Wire.write(0x03);                        // SENS_START: Tstart , Hstart
@@ -194,10 +193,10 @@ bool ENS210::startsingle(void) {
 bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   uint8_t i2cbuf[6];
   // Read T_VAL and H_VAL
-  Wire.beginTransmission(ENS210_I2CADDR);  // START, SLAVEADDR
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_T_VAL);            // Register address (T_VAL); using auto increment (up to H_VAL)
   int result= Wire.endTransmission(false); // Repeated START
-  Wire.requestFrom(ENS210_I2CADDR,6,true); // From ENS210, read 6 bytes, STOP
+  Wire.requestFrom(_slaveaddress,6,true);  // From ENS210, read 6 bytes, STOP
   //Serial.printf("ens210: debug: read %d\n",result);
   if( result!=0 ) return false;
   // Retrieve and pack bytes into t_val and h_val
@@ -308,6 +307,7 @@ void ENS210::correction_set(int correction) {
 }
 
 
+// Gets the solder correction
 int ENS210::correction_get(void) {
   return _soldercorrection;
 }
