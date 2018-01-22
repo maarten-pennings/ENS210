@@ -31,16 +31,16 @@ class ENS210 {
     void measure(int * t_data, int * t_status, int * h_data, int * h_status );
 
   public: // Conversion functions - the temperature conversions also subtract the solder correction (see correction_set() method).
-    int32_t toKelvin     (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Kelvin
-    int32_t toCelsius    (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Celsius
-    int32_t toFahrenheit (int t_data, int multiplier); // Converts t_data (from `measure`) to multiplier*Fahrenheit
-    int32_t toPercentageH(int h_data, int multiplier); // Converts h_data (from `measure`) to multiplier*%RH
+    int32_t toKelvin     (int t_data, int multiplier); // Converts t_data (from `measure`) to 1/multiplier Kelvin
+    int32_t toCelsius    (int t_data, int multiplier); // Converts t_data (from `measure`) to 1/multiplier Celsius
+    int32_t toFahrenheit (int t_data, int multiplier); // Converts t_data (from `measure`) to 1/multiplier Fahrenheit
+    int32_t toPercentageH(int h_data, int multiplier); // Converts h_data (from `measure`) to 1/multiplier %RH
 
     // Optionally set a solder `correction` (units: 1/64K, default from `begin` is 0).
     // See "Effect of Soldering on Temperature Readout" in "Design-Guidelines" from
     // https://download.ams.com/ENVIRONMENTAL-SENSORS/ENS210/Documentation
-    void correction_set(int correction=50*64/1000); // Sets the solder correction (default is 50mK) - only used by the `toXxx()` functions.
-    int  correction_get(void);                      // Gets the solder correction.
+    void correction_set(int correction=50*64/1000);    // Sets the solder correction (default is 50mK) - only used by the `toXxx()` functions.
+    int  correction_get(void);                         // Gets the solder correction.
 
   public: // Helper functions (communicating with ENS210)
     bool reset(void);                                  // Sends a reset to the ENS210. Returns false on I2C problems.
@@ -54,7 +54,7 @@ class ENS210 {
     const char * status_str( int status );             // Converts a status (ENS210_STATUS_XXX) to a human readable string.
 
   private: // Data members
-    int _soldercorrection;                             // Correction due to soldering (in 1/64K); subtracted from `t_data` by conversion functions.
+    int  _soldercorrection;                            // Correction due to soldering (in 1/64K); subtracted from `t_data` by conversion functions.
 };
 
 
