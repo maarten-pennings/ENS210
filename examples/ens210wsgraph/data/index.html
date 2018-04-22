@@ -42,7 +42,7 @@
         millisPerPixel:100,
         grid:{millisPerLine:10000,verticalSections:7},
         minValue:18,
-        maxValue:25,
+        maxValue:28,
         labels:{precision: 2},
         yMinFormatter: tformatter,
         yMaxFormatter: tformatter,
@@ -93,26 +93,26 @@
 
       connection.onopen= function() {
         console.log("ws: on: opened");
-        var statusSpan= document.getElementById("idStatus");
-        statusSpan.innerHTML= "connected";
+        document.getElementById("id.s").innerHTML= "connected";
       };
 
       connection.onclose= function() {
         console.log("ws: on: closed");
-        var statusSpan= document.getElementById("idStatus");
-        statusSpan.innerHTML= "closed";
+        document.getElementById("id.s").innerHTML= "closed";
       };
 
       connection.onerror= function(errorMsg) {
         console.log('ws: on: error: ', errorMsg);
-        var statusSpan= document.getElementById("idStatus");
-        statusSpan.innerHTML= "Error: " + errorMsg;
+        document.getElementById("id.s").innerHTML= "error: " + errorMsg;
       };
 
-      var mc=0;
+      var lasttime;
+      var avgdelta;
+      var count=0;
+      var tmr;
       connection.onmessage= function(msg) {
         console.log('ws: msg: ', msg.data);
-        mc++;
+        count++;
         // Parse msg.data "T=21.44, H=40.85" into two floats
         var ft = null;
         var fh = null;
@@ -125,11 +125,20 @@
             var sh=val[1].substring(2);
             ft = parseFloat(st);
             fh = parseFloat(sh);
-            // Update graph an labels
+            // Compute time
             var time= new Date().getTime();
+            var delta= time-lasttime;
+            lasttime= time;
+            if( count==2 ) avgdelta= delta; 
+            if( count>=3 ) avgdelta= avgdelta*9/10.0 + delta/10.0;
+            // lost connection
+            clearTimeout(tmr);
+            tmr= setTimeout( function(){document.getElementById("id.a").innerHTML="lost";}, 1000 );
+            // Update graph an labels
             document.getElementById("id.t").innerHTML= "T = "+ft.toFixed(2)+" \u00B0C";
             document.getElementById("id.h").innerHTML= "H = "+fh.toFixed(2)+" %RH";
-            document.getElementById("id.s").innerHTML= mc;
+            document.getElementById("id.c").innerHTML= count;
+            document.getElementById("id.a").innerHTML= count>=2 ? Math.round(avgdelta)+"ms" : "?";
             tline.append(time, ft);
             hline.append(time, fh);
           } else {
@@ -145,7 +154,7 @@
   <body onload="init();">
     <table width="100%">
       <tr>
-        <td colspan="2"><big>ENS210 websocket graphs (<span id="id.s">0</span>)</big></td>
+        <td colspan="2"><big>ENS210 websocket graphs (<span id="id.c">count</span>, <span id="id.a">aver</span>, <span id="id.s">stat</span>)</big></td>
       </tr>
       <tr>
         <td width="50%"><canvas id="t_canvas">Your browser doesn't support canvas</canvas></td>

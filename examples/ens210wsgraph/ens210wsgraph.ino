@@ -39,8 +39,7 @@ How to use
 #define APNAME   "ENS210"     // Name of the Access Point
 #define FILEHTML "index.html" // The html file to return to webbrowsers
 #define FILEJS   "smoothie.js"// The js file to return to webbrowsers
-#define WAIT     500          // Delays in ms between websocket messages (ens210 measurements)
-#define VERSION  "v1"         // Version of this app
+#define VERSION  "v1.1"       // Version of this app
 
 
 #define LED_PIN    D4    // GPIO2 == D4 == standard BLUE led available on most NodeMCU boards (LED on == D4 low)
@@ -111,6 +110,7 @@ void setup() {
   Serial.printf("init: AP %s\n", ok ? "up" : "ERROR");
 
   // Start dns on standard port (53) 
+  dns_server.setErrorReplyCode(DNSReplyCode::NoError);
   dns_server.start(53, "*", ip);
   Serial.println("init: DNS server up");
 
@@ -136,6 +136,12 @@ void setup() {
     f.close();
     Serial.printf("done\n");
   });
+  http_server.onNotFound( []() {
+    Serial.printf("http: req '%s' ... ",http_server.uri().c_str());
+    http_server.sendHeader("Location", "http://10.10.10.10/", true);
+    http_server.send( 302, "text/plain", "");
+    Serial.printf("redirected\n");
+  });
   http_server.begin();
   Serial.printf("init: HTTP server up\n");
 
@@ -157,20 +163,14 @@ void loop() {
   http_server.handleClient();
   dns_server.processNextRequest();
 
-  // Abort loop() if too early for next measurement
-  uint32_t now= millis();
-  static uint32_t prev;
-  uint32_t wait= now-prev;
-  if( wait<WAIT ) return;
-  prev= now;
-
   // Read and broadcast ENS210 measurement
-  led_on();
   ens210_measure(&TData,&TStatus,&HData,&HStatus);
   String T= String(TData,2);
   String H= String(HData,2);
-  Serial.printf("data: %s°C (%s) %s%%RH (%s) %ums\n",T.c_str(),ens210.status_str(TStatus),H.c_str(),ens210.status_str(HStatus),wait);
+  Serial.printf("data: %s°C (%s) %s%%RH (%s)\n",T.c_str(),ens210.status_str(TStatus),H.c_str(),ens210.status_str(HStatus));
   ws_server.broadcastTXT(String("T=")+T+", H="+H);
-  led_off();  
+
+  // Led feedback
+  led_tgl();
 }
 
