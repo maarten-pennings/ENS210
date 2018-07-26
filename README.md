@@ -18,9 +18,8 @@ The Nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
 ## Links
 The ENS210 is made by [ams](http://www.ams.com).
  - Find the datasheet of the ENS210 on the
-   [product page](http://ams.com/eng/Products/Environmental-Sensors/Relative-Humidity-and-Temperature-Sensors/ENS210).
- - Find application notes and software on the
-   [download page](https://download.ams.com/ENVIRONMENTAL-SENSORS/ENS210).
+   [product page](https://ams.com/ens210).
+ - On the same page, find the application notes and software.
 
 ## Prerequisites
 It is assumed that
