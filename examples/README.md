@@ -2,8 +2,8 @@
 There are several examples of increasing complexity.
 
 
-## ens210simple
-A simple demo sketch that prints measurement data from them ENS210,
+## ens210basic
+A basic demo sketch that prints measurement data from them ENS210,
 relative humidity and temperature.
 
 This is a bare minimum example.
@@ -12,16 +12,16 @@ The ENS210 library is used without error error handling.
 
 
 ## ens210full
-A sketch, that is simple like ens210simple in that it uses no other libraries.
+A sketch, that is basic like ens210basic in that it uses no other libraries.
 But it does employ full error handling and it demos all conversions (Kelvin, Celsius, Fahrenheit).
 
 
 ## ens210thingspeak
-A real application, not just a simple demo.
+A real application, not just a basic demo.
 Reads temperature and humidity from the ENS210, and uploads that to a ThingSpeak channel.
 
 This application uses several (standard) libraries, like WiFi and ThingSpeak.
-It also requires you to create a ThingSpeak account and create an appropriate channel to receive the data.
+It also requires creation of a ThingSpeak account and an appropriate ThingSpeak channel to receive and store the data.
 
 This has only been tested on ESP8266.
 
@@ -32,6 +32,8 @@ The data appears in a simple list in the browser.
 Uses several libraries: web server, websocket server, dns server, flash file system.
 
 This has only been tested on ESP8266.
+
+Note that this example uses the flash file system of the ESP8266 (see ino for instructions).
 
 
 ## ens210wsgraph
