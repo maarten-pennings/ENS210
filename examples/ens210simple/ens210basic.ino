@@ -1,5 +1,5 @@
 /*
-  ens210simple.ino - Simple demo sketch (no error handling) printing results of the ENS210 relative humidity and temperature sensor with I2C interface from ams
+  ens210basic.ino - Basic demo sketch (no error handling) printing results of the ENS210 relative humidity and temperature sensor with I2C interface from ams
   Created by Maarten Pennings 2017 Aug 2
 */
 
@@ -15,7 +15,7 @@ void setup() {
   // Enable serial
   Serial.begin(115200);
   Serial.println("");
-  Serial.println("Starting ENS210 simple demo");
+  Serial.println("Starting ENS210 basic demo");
 
   // Enable I2C
   // Wire.begin(D2,D1); // For ESP8266 NodeMCU boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
