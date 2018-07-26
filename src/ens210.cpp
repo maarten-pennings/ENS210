@@ -12,8 +12,8 @@
 
 // Chip constants
 #define ENS210_PARTID          0x0210 // The expected part id of the ENS210
-#define ENS210_THCONVERSIONTIME   130 // Conversion time in ms for one T/H measurement
-#define ENS210_BOOTING              2 // Booting time in ms (also after reset, or going to high power)
+#define ENS210_THCONVERSION_MS    130 // Conversion time in ms for one T/H measurement
+#define ENS210_BOOTING_MS           2 // Booting time in ms (also after reset, or going to high power)
 
 // Addresses of the ENS210 registers
 #define ENS210_REG_PART_ID       0x00
@@ -92,12 +92,12 @@ void ENS210::measure(int * t_data, int * t_status, int * h_data, int * h_status 
   *t_status= ENS210_STATUS_I2CERROR;
   *h_status= ENS210_STATUS_I2CERROR;
   // Start a single shot measurement
-  ok= startsingle(); if(!ok) return;
+  ok= startsingle(); if(!ok) return; // Both statuses have value ENS210_STATUS_I2CERROR
   // Wait for measurement to complete
-  delay(ENS210_THCONVERSIONTIME);
+  delay(ENS210_THCONVERSION_MS);
   // Get the measurement data
-  ok= read(&t_val,&h_val); if(!ok) return;
-  // Extract the data and status
+  ok= read(&t_val,&h_val); if(!ok) return;  // Both statuses have value ENS210_STATUS_I2CERROR
+  // Extract the data and update the statuses
   extract(t_val, t_data, t_status);
   extract(h_val, h_data, h_status);
 }
@@ -105,12 +105,12 @@ void ENS210::measure(int * t_data, int * t_status, int * h_data, int * h_status 
 
 // Sends a reset to the ENS210. Returns false on I2C problems.
 bool ENS210::reset(void) {
-  Wire.beginTransmission(_slaveaddress);  // START, SLAVEADDR
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(0x80);                        // SYS_CTRL: reset
-  int result= Wire.endTransmission(true);  // STOP
+  int result= Wire.endTransmission();      // STOP
   //Serial.printf("ens210: debug: reset %d\n",result);
-  delay(ENS210_BOOTING);                   // Wait to boot after reset
+  delay(ENS210_BOOTING_MS);                // Wait to boot after reset
   return result==0;
 }
 
@@ -121,9 +121,9 @@ bool ENS210::lowpower(bool enable) {
   Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(power);                       // SYS_CTRL: power
-  int result= Wire.endTransmission(true);  // STOP
+  int result= Wire.endTransmission();      // STOP
   //Serial.printf("ens210: debug: lowpower(%d) %d\n",power,result);
-  delay(ENS210_BOOTING);                   // Wait boot-time after power switch
+  delay(ENS210_BOOTING_MS);                // Wait boot-time after power switch
   return result==0;
 }
 
@@ -142,7 +142,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
     Wire.write(ENS210_REG_PART_ID);          // Register address (PART_ID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
-    Wire.requestFrom(_slaveaddress,2,true);  // From ENS210, read 2 bytes, STOP
+    Wire.requestFrom(_slaveaddress,2);       // From ENS210, read 2 bytes, STOP
     //Serial.printf("ens210: debug: getversion/part_id %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into partid
@@ -155,7 +155,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
     Wire.write(ENS210_REG_UID);              // Register address (UID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
-    Wire.requestFrom(_slaveaddress,8,true);  // From ENS210, read 8 bytes, STOP
+    Wire.requestFrom(_slaveaddress,8);       // From ENS210, read 8 bytes, STOP
     //Serial.printf("ens210: debug: getversion/uid %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into uid (ignore the endianness)
@@ -181,9 +181,9 @@ errorexit:
 bool ENS210::startsingle(void) {
   Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_SENS_RUN);         // Register address (SENS_RUN); using auto increment
-  Wire.write(0x00);                        // SENS_RUN  : Tsingle, Hsingle
-  Wire.write(0x03);                        // SENS_START: Tstart , Hstart
-  int result= Wire.endTransmission(true);  // STOP
+  Wire.write(0x00);                        // SENS_RUN  : T_RUN=0/single , H_RUN=0/single
+  Wire.write(0x03);                        // SENS_START: T_START=1/start, H_START=1/start
+  int result= Wire.endTransmission();      // STOP
   //Serial.printf("ens210: debug: startsingle %d\n",result);
   return result==0;
 }
@@ -196,7 +196,7 @@ bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
   Wire.write(ENS210_REG_T_VAL);            // Register address (T_VAL); using auto increment (up to H_VAL)
   int result= Wire.endTransmission(false); // Repeated START
-  Wire.requestFrom(_slaveaddress,6,true);  // From ENS210, read 6 bytes, STOP
+  Wire.requestFrom(_slaveaddress,6);       // From ENS210, read 6 bytes, STOP
   //Serial.printf("ens210: debug: read %d\n",result);
   if( result!=0 ) return false;
   // Retrieve and pack bytes into t_val and h_val
@@ -254,6 +254,7 @@ int32_t ENS210::toKelvin(int t_data, int multiplier) {
   // Uses K=t/64.
   return IDIV(multiplier*t,64);
 }
+
 
 // Convert raw `t_data` temperature to Celsius (also applies the solder correction).
 // The output value is in Celsius multiplied by parameter `multiplier`.
