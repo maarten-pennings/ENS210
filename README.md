@@ -2,14 +2,9 @@
 Arduino library for the ENS210 relative humidity and temperature sensor with I2C interface from ams
 
 ## Introduction
-This project is an Arduino *library*. It implements a driver for the ENS210.
-This chip is a relative humidity and temperature sensor with an I2C interface.
-This driver is based on the code supplied by *ams*, the manufacturer of the chip.
-
-The code has been tested with
- - [NodeMCU (ESP8266)](https://www.aliexpress.com/item/NodeMCU-V3-Lua-WIFI-module-integration-of-ESP8266-extra-memory-32M-flash-USB-serial-CP2102/32779738528.html)
- - [Arduino pro mini](https://www.aliexpress.com/item/ProMini-ATmega328P-3-3V-Compatible-for-Arduino-Pro-Mini/32525927539.html)
- - [Arduino nano](https://www.aliexpress.com/item/Nano-CH340-ATmega328P-MicroUSB-Compatible-for-Arduino-Nano-V3/32572612009.html)
+This project is an Arduino *library*. It implements a driver with examples for the ENS210.
+The ENS210 chip is a relative humidity and temperature sensor with an I2C interface.
+The driver in this Arduino library is based on the code supplied by *ams*, the manufacturer of the chip.
 
 Note that the ENS210 requires a supply voltage of 1.71V .. 3.6V.
 So, 3.3V is ok, but *do not use a 5V board*.
@@ -19,7 +14,7 @@ The Nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
 The ENS210 is made by [ams](http://www.ams.com).
  - Find the datasheet of the ENS210 on the
    [product page](https://ams.com/ens210).
- - On the same page, find the application notes and software.
+ - On the same page, find the application notes and software (including a driver).
 
 ## Prerequisites
 It is assumed that
@@ -44,13 +39,19 @@ Installation steps
 ## Build an example
 To build an example sketch
  - (Re)start Arduino.
- - Open File > Example > Examples from Custom Libraries > ENS210 > ENS210simple.
- - Make sure Tools > Board lists the correct board.
+ - Open File > Example > Examples from Custom Libraries > ENS210 > ens210basic.
+ - Make sure Tools > Board lists the correct board and Tools > Port the correct COM port.
  - Select Sketch > Verify/Compile.
+
+There are several [examples](examples) available with this library.
 
 ## Wiring
 This library has been tested with three boards.
+ - [NodeMCU (ESP8266)](https://www.aliexpress.com/item/NodeMCU-V3-Lua-WIFI-module-integration-of-ESP8266-extra-memory-32M-flash-USB-serial-CP2102/32779738528.html)
+ - [Arduino pro mini](https://www.aliexpress.com/item/ProMini-ATmega328P-3-3V-Compatible-for-Arduino-Pro-Mini/32525927539.html)
+ - [Arduino nano](https://www.aliexpress.com/item/Nano-CH340-ATmega328P-MicroUSB-Compatible-for-Arduino-Nano-V3/32572612009.html)
 
+### NodeMCU (ESP8266)
 For the NodeMCU (ESP8266), connect as follows (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 | ESP8266 |
@@ -62,6 +63,7 @@ For the NodeMCU (ESP8266), connect as follows (I did not use pull-ups, presumabl
 
 ![wiring ESP8266 NoeMCU](wire-esp.jpg)
 
+### Arduino pro mini
 For the Pro mini (do *not* use a 5V board), connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 | Pro mini |
@@ -73,6 +75,7 @@ For the Pro mini (do *not* use a 5V board), connect as follows  (I did not use p
 
 ![wiring pro mini](wire-promini.jpg)
 
+### Arduin nano
 For the Arduino Nano, connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 |   Nano   |
@@ -85,9 +88,9 @@ For the Arduino Nano, connect as follows  (I did not use pull-ups, presumably th
 ![wiring nano](wire-nanov3.jpg)
 
 ## Flash an example
-To build an example sketch
+To flash an example sketch
  - (Re)start Arduino.
- - Open File > Example > Examples from Custom Libraries > ENS210 > ENS210simple.
+ - Open File > Example > Examples from Custom Libraries > ENS210 > ens210basic.
  - Alternatively open File > Example > Examples from Custom Libraries > ENS210 > ENS210full.
  - In `setup()` make sure to start the I2C driver correctly.
    For example, for ESP8266 NodeMCU have
@@ -100,13 +103,13 @@ To build an example sketch
      // Wire.begin(D2,D1); // For ESP8266 nodemcu boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
      Wire.begin(); // Arduino pro mini or Nano [VDD to VCC/3V3, GND to GND, SDA to A4, SCL to A5]
      ```
- - Make sure Tools > Board lists the correct board.
+ - Make sure Tools > Board lists the correct board and Tools > Port the correct COM port.
  - Select Sketch > Upload.
  - Select Tools > Serial Monitor.
- - Enjoy the output, which should be like this for `ENS210simple`:
+ - Enjoy the output, which should be like this for `ens210basic`:
 
      ```Text
-     Starting ENS210 simple demo
+     Starting ENS210 basic demo
      19.9 C, 59 %RH
      23.1 C, 79 %RH
      23.1 C, 79 %RH
