@@ -8,7 +8,7 @@ The driver in this Arduino library is based on the code supplied by *ams*, the m
 
 Note that the ENS210 requires a supply voltage of 1.71V .. 3.6V.
 So, 3.3V is ok, but *do not use a 5V board*.
-The Nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
+The Arduino nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
 
 ## Links
 The ENS210 is made by [ams](http://www.ams.com).
@@ -40,7 +40,7 @@ Installation steps
 To build an example sketch
  - (Re)start Arduino.
  - Open File > Example > Examples from Custom Libraries > ENS210 > ens210basic.
- - Make sure Tools > Board lists the correct board and Tools > Port the correct COM port.
+ - Make sure Tools > Board lists the correct board.
  - Select Sketch > Verify/Compile.
 
 There are several [examples](examples) available with this library.
@@ -123,6 +123,5 @@ To flash an example sketch
      19.3 C, 79 %RH
      19.3 C, 68 %RH
      ```
-
 
 (end of doc)
