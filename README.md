@@ -63,8 +63,8 @@ For the NodeMCU (ESP8266), connect as follows (I did not use pull-ups, presumabl
 
 ![wiring ESP8266 NoeMCU](wire-esp.jpg)
 
-### Arduino pro mini
-For the Pro mini (do *not* use a 5V board), connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
+### Arduino Pro Mini
+For the Pro Mini (do *not* use a 5V board), connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 | Pro mini |
 |:------:|:--------:|
@@ -75,7 +75,7 @@ For the Pro mini (do *not* use a 5V board), connect as follows  (I did not use p
 
 ![wiring pro mini](wire-promini.jpg)
 
-### Arduin nano
+### Arduino Nano
 For the Arduino Nano, connect as follows  (I did not use pull-ups, presumably they are inside the MCU)
 
 | ENS210 |   Nano   |
