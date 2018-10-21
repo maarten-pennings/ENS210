@@ -5,7 +5,7 @@
 
 
 #include <assert.h>
-#include <arduino.h>
+#include <Arduino.h>
 #include <Wire.h>
 #include "ens210.h"
 
