@@ -1,6 +1,7 @@
 /*
   ens210.cpp - Library for the ENS210 relative humidity and temperature sensor with I2C interface from ams
-  Created by Maarten Pennings 2017 Aug 2
+  2018 Oct 23  v2  Maarten Pennings  Improved begin()
+  2017 Aug  2  v1  Maarten Pennings  Created
 */
 
 
@@ -8,6 +9,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "ens210.h"
+
+
+// begin() prints errors to help diagnose startup problems.
+// Change these macro's to empty to suppress those prints.
+#define PRINTLN Serial.println
+#define PRINT   Serial.print
+#define PRINTF  Serial.printf
 
 
 // Chip constants
@@ -74,10 +82,15 @@ bool ENS210::begin(void) {
   uint16_t partid;
   // Record solder correction
   _soldercorrection= 0;
-  // Reset, get and check partid
-  ok= reset();  if(!ok) return false;
-  ok= getversion(&partid,NULL); if(!ok) return false;
-  if( partid!=ENS210_PARTID ) return false;
+  // Reset
+  ok= reset();  
+  if( !ok ) ok= reset(); // Retry
+  if( !ok ) { PRINTLN("ens210: begin: reset failed (ENS210 connected? Wire.begin called?)"); return false; }
+  // Get partid
+  ok= getversion(&partid,NULL); 
+  if( !ok ) { PRINTLN("ens210: begin: getversion failed"); return false; }
+  // Check partid
+  if( partid!=ENS210_PARTID ) { PRINT("ens210: begin: PARTID mismatch: "); PRINTLN(partid,HEX); return false; }
   // Success
   return true;
 }
@@ -109,7 +122,7 @@ bool ENS210::reset(void) {
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(0x80);                        // SYS_CTRL: reset
   int result= Wire.endTransmission();      // STOP
-  //Serial.printf("ens210: debug: reset %d\n",result);
+  //PRINTF("ens210: debug: reset %d\n",result);
   delay(ENS210_BOOTING_MS);                // Wait to boot after reset
   return result==0;
 }
@@ -122,7 +135,7 @@ bool ENS210::lowpower(bool enable) {
   Wire.write(ENS210_REG_SYS_CTRL);         // Register address (SYS_CTRL)
   Wire.write(power);                       // SYS_CTRL: power
   int result= Wire.endTransmission();      // STOP
-  //Serial.printf("ens210: debug: lowpower(%d) %d\n",power,result);
+  //PRINTF("ens210: debug: lowpower(%d) %d\n",power,result); // 0:success, 1:data-too-long, 2:NACK-on-addr, 3:NACK-on-data, 4:other
   delay(ENS210_BOOTING_MS);                // Wait boot-time after power switch
   return result==0;
 }
@@ -143,7 +156,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     Wire.write(ENS210_REG_PART_ID);          // Register address (PART_ID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
     Wire.requestFrom(_slaveaddress,2);       // From ENS210, read 2 bytes, STOP
-    //Serial.printf("ens210: debug: getversion/part_id %d\n",result);
+    //PRINTF("ens210: debug: getversion/part_id %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into partid
     for( int i=0; i<2; i++ ) i2cbuf[i]= Wire.read();
@@ -156,7 +169,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
     Wire.write(ENS210_REG_UID);              // Register address (UID); using auto increment
     result= Wire.endTransmission(false);     // Repeated START
     Wire.requestFrom(_slaveaddress,8);       // From ENS210, read 8 bytes, STOP
-    //Serial.printf("ens210: debug: getversion/uid %d\n",result);
+    //PRINTF("ens210: debug: getversion/uid %d\n",result);
     if( result!=0 ) goto errorexit;
     // Retrieve and pack bytes into uid (ignore the endianness)
     for( int i=0; i<8; i++) ((uint8_t*)uid)[i]=Wire.read();
@@ -165,7 +178,7 @@ bool ENS210::getversion(uint16_t*partid,uint64_t*uid) {
   // Go back to default power mode (low power enabled)
   ok= lowpower(true); if(!ok) goto errorexit;
 
-  // { uint32_t hi= *uid >>32, lo= *uid & 0xFFFFFFFF; Serial.printf("ens210: debug: PART_ID=%04x UID=%08x %08x\n",*partid,hi,lo); }
+  // { uint32_t hi= *uid >>32, lo= *uid & 0xFFFFFFFF; PRINTF("ens210: debug: PART_ID=%04x UID=%08x %08x\n",*partid,hi,lo); }
   // Success
   return true;
 
@@ -184,7 +197,7 @@ bool ENS210::startsingle(void) {
   Wire.write(0x00);                        // SENS_RUN  : T_RUN=0/single , H_RUN=0/single
   Wire.write(0x03);                        // SENS_START: T_START=1/start, H_START=1/start
   int result= Wire.endTransmission();      // STOP
-  //Serial.printf("ens210: debug: startsingle %d\n",result);
+  //PRINTF("ens210: debug: startsingle %d\n",result);
   return result==0;
 }
 
@@ -197,14 +210,14 @@ bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   Wire.write(ENS210_REG_T_VAL);            // Register address (T_VAL); using auto increment (up to H_VAL)
   int result= Wire.endTransmission(false); // Repeated START
   Wire.requestFrom(_slaveaddress,6);       // From ENS210, read 6 bytes, STOP
-  //Serial.printf("ens210: debug: read %d\n",result);
+  //PRINTF("ens210: debug: read %d\n",result);
   if( result!=0 ) return false;
   // Retrieve and pack bytes into t_val and h_val
   for( int i=0; i<6; i++ ) i2cbuf[i]= Wire.read();
   *t_val= (i2cbuf[2]*65536UL) + (i2cbuf[1]*256UL) + (i2cbuf[0]*1UL);
   *h_val= (i2cbuf[5]*65536UL) + (i2cbuf[4]*256UL) + (i2cbuf[3]*1UL);
   // Range checking
-  //Serial.printf("ens210: debug: read T=%06x H=%06x\n",*t_val,*h_val);
+  //PRINTF("ens210: debug: read T=%06x H=%06x\n",*t_val,*h_val);
   //if( *t_val<(273-100)*64 || *t_val>(273+150)*64 ) return false; // Accept only readouts -100<=T_in_C<=+150 (arbitrary limits)
   //if( *h_val>100*512 ) return false; // Accept only readouts 0<=H<=100
   // Success
