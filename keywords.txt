@@ -33,6 +33,8 @@ reset	KEYWORD2
 lowpower	KEYWORD2
 getversion	KEYWORD2
 startsingle	KEYWORD2
+startcont	KEYWORD2
+stopcont	KEYWORD2
 read	KEYWORD2
 extract	KEYWORD2
 status_str	KEYWORD2

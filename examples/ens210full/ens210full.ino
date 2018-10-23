@@ -19,8 +19,7 @@ void setup() {
   Serial.println("Starting ENS210 full demo");
 
   // Enable I2C
-  Wire.begin(D2,D1); // For ESP8266 NodeMCU boards [VDD to 3V3, GND to GND, SDA to D2, SCL to D1]
-  // Wire.begin(); // Arduino pro mini or Nano [VDD to VCC/3V3, GND to GND, SDA to A4, SCL to A5]
+  Wire.begin(); // For ESP8266 NodeMCU boards: VDD to 3V3, GND to GND, SDA to D2, SCL to D1
 
   // Enable ENS210
   bool ok= ens210.begin();

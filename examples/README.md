@@ -11,9 +11,19 @@ It tries to not use any other libraries (it only uses `Serial` to print results,
 The ENS210 library is used without error error handling.
 
 
+## ens210cont
+A sketch that demonstrates the continuous mode of the ENS210.
+No error handling.
+
+
 ## ens210full
 A sketch, that is basic like ens210basic in that it uses no other libraries.
 But it does employ full error handling and it demos all conversions (Kelvin, Celsius, Fahrenheit).
+
+
+## ens210single
+A sketch that demonstrates single shot mode, doing other work during the conversion.
+No error handling.
 
 
 ## ens210thingspeak

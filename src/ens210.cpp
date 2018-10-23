@@ -20,7 +20,6 @@
 
 // Chip constants
 #define ENS210_PARTID          0x0210 // The expected part id of the ENS210
-#define ENS210_THCONVERSION_MS    130 // Conversion time in ms for one T/H measurement
 #define ENS210_BOOTING_MS           2 // Booting time in ms (also after reset, or going to high power)
 
 // Addresses of the ENS210 registers
@@ -107,7 +106,7 @@ void ENS210::measure(int * t_data, int * t_status, int * h_data, int * h_status 
   // Start a single shot measurement
   ok= startsingle(); if(!ok) return; // Both statuses have value ENS210_STATUS_I2CERROR
   // Wait for measurement to complete
-  delay(ENS210_THCONVERSION_MS);
+  delay(ENS210_THCONV_SINGLE_MS);
   // Get the measurement data
   ok= read(&t_val,&h_val); if(!ok) return;  // Both statuses have value ENS210_STATUS_I2CERROR
   // Extract the data and update the statuses
@@ -202,6 +201,29 @@ bool ENS210::startsingle(void) {
 }
 
 
+// Configures ENS210 to switch to continuous measurement. Returns false on I2C problems.
+bool ENS210::startcont(void) {
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
+  Wire.write(ENS210_REG_SENS_RUN);         // Register address (SENS_RUN); using auto increment
+  Wire.write(0x03);                        // SENS_RUN  : T_RUN=1/cont , H_RUN=1/cont
+  Wire.write(0x03);                        // SENS_START: T_START=1/start, H_START=1/start
+  int result= Wire.endTransmission();      // STOP
+  //PRINTF("ens210: debug: startcont %d\n",result);
+  return result==0;
+}
+
+
+// Configures ENS210 to stop continuous measurement. Returns false on I2C problems.
+bool ENS210::stopcont(void) {
+  Wire.beginTransmission(_slaveaddress);   // START, SLAVEADDR
+  Wire.write(ENS210_REG_SENS_STOP);        // Register address (SENS_STOP)
+  Wire.write(0x03);                        // SENS_START: T_STOP=1/start, H_STOP=1/start
+  int result= Wire.endTransmission();      // STOP
+  //PRINTF("ens210: debug: stopcont %d\n",result);
+  return result==0;
+}
+
+
 // Reads measurement data from the ENS210. Returns false on I2C problems.
 bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   uint8_t i2cbuf[6];
@@ -222,6 +244,24 @@ bool ENS210::read(uint32_t *t_val, uint32_t *h_val) {
   //if( *h_val>100*512 ) return false; // Accept only readouts 0<=H<=100
   // Success
   return true;
+}
+
+
+// Reads measurement data from the ENS210 and extracts data and status.
+void ENS210::read(int*t_data,int*t_status,int*h_data,int*h_status) {
+  uint32_t t_val;
+  uint32_t h_val;
+  // Get the measurement data
+  bool ok=read(&t_val,&h_val);
+  if( !ok ) {
+    // Signal I2C error
+    *t_status= ENS210_STATUS_I2CERROR;
+    *h_status= ENS210_STATUS_I2CERROR;
+  } else {
+    // Extract the data and update the statuses
+    extract(t_val, t_data, t_status);
+    extract(h_val, h_data, h_status);
+  } 
 }
 
 
