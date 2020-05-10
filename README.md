@@ -11,10 +11,11 @@ So, 3.3V is ok, but *do not use a 5V board*.
 The Arduino nano has 3v3 supply, but runs I2C on 5V. This does seem to work.
 
 ## Links
-The ENS210 is made by [ams](http://www.ams.com).
- - Find the datasheet of the ENS210 on the
-   [product page](https://ams.com/ens210).
- - On the same page, find the application notes and software (including a driver).
+The ENS210 is made by [ScioSense](https://www.sciosense.com/) formerly [ams](http://ams.com).
+ - Find the [datasheet](https://www.sciosense.com/wp-content/uploads/2019/12/ENS210-Datasheet.pdf) of the ENS210 on the
+   [product page](https://www.sciosense.com/products/relative-humidity-and-temperature-sensors/ens210-relative-humidity-and-temperature-sensor/).
+ - Sciosense has a [github account](https://github.com/sciosense) 
+   with a copy of [this library](https://github.com/sciosense/ENS210_driver).
 
 ## Prerequisites
 It is assumed that
